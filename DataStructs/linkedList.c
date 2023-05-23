@@ -325,10 +325,3 @@ void ShowConvertFromArray(void)
     freeMemory(stringHead);
     freeMemory(charHead);
 }
-
-int main(void)
-{
-    // ShowBasicCreation();
-    ShowConvertFromArray();
-    return 0;
-}
