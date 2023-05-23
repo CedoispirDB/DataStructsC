@@ -1,16 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-
-typedef struct Node Node;
-
-struct Node
-{
-    void *value;
-    Node *next;
-    const char *dataType;
-};
+#include "linkedList.h"
 
 Node *createNode()
 {

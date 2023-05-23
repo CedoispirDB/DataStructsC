@@ -20,7 +20,7 @@ SRCS := $(wildcard $(SRC_DIR)/*.c)
 OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 # OBJS := $(strip $(OBJS))
 # Executable name
-EXEC := $(OBJ_DIR)/$(DATA_NAME)
+EXEC := $(OBJ_DIR)/main
 
 # Default target
 all: $(EXEC)
@@ -32,7 +32,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	del .\$(OBJ_DIR)\$(DATA_NAME).o
-	del .\$(OBJ_DIR)\$(DATA_NAME).exe
+	del .\$(OBJ_DIR)\*.o
+	del .\$(OBJ_DIR)\main.exe
 
 .PHONY: all clean
