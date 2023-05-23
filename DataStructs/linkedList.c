@@ -129,7 +129,7 @@ Node *insert(Node *head, void *value, int index, char *dataType)
     newNode->dataType = dataType;
 
     Node *prevNode = getNode(head, index - 1);
-    Node *nextNode = getNode(head, index + 1);
+    Node *nextNode = getNode(head, index);
 
     // printf("prevNode - ptr: %p value: %i, next: %p", (void *) prevNode, *(int*)(prevNode->value), (void *)(prevNode->next));
     // printf("nextNode - ptr: %p value: %i, next: %p", (void *) nextNode, *(int*)(nextNode->value), (void *)(nextNode->next));
@@ -196,16 +196,30 @@ Node *convertArray(void *array, size_t len, char *dataType)
     }
     else if (strcmp(dataType, "str") == 0)
     {
-        char *strArray = (char *)array;
+        char **strArray = (char **)array;
 
         for (size_t i = 0; i < len; ++i)
         {
             if (i == 0)
             {
-                head = add(NULL, (void *)&strArray[i], dataType);
+                head = add(NULL, (void *)strArray[i], dataType);
                 continue;
             }
-            add(head, (void *)&strArray[i], dataType);
+            add(head, (void *)strArray[i], dataType);
+        }
+    }
+    else if (strcmp(dataType, "char") == 0)
+    {
+        char *charArray = (char *)array;
+
+        for (size_t i = 0; i < len; ++i)
+        {
+            if (i == 0)
+            {
+                head = add(NULL, &charArray[i], dataType);
+                continue;
+            }
+            add(head, &charArray[i], dataType);
         }
     }
     else
@@ -215,22 +229,6 @@ Node *convertArray(void *array, size_t len, char *dataType)
 
     return head;
 }
-
-// void printValues(Node* head, int index) {
-//     void* value = get(head, index);
-
-//     size_t size = sizeof(*value);
-
-//     if(size == 1) {
-//         // Char
-//         printf("here\n");
-//         printf("Value at %i: %s\n", index, (char*)value);
-//     } else if(size == 4) {
-//         printf("here 2\n");
-
-//         printf("Value at %i: %i\n", index, *(int*)value);
-//     }
-// }
 
 void printValues(Node *head)
 {
@@ -242,11 +240,15 @@ void printValues(Node *head)
 
         if (strcmp(dataType, "int") == 0)
         {
-            printf("Value at %i: %i (%s)\n", i, *(int *)current->value, dataType);
+            printf("Value at index %i: %i (%s)\n", i, *(int *)current->value, dataType);
         }
         else if (strcmp(dataType, "str") == 0)
         {
-            printf("Value at %i: %s (%s)\n", i, (char *)current->value, dataType);
+            printf("Value at index %i: %s (%s)\n", i, (char *)current->value, dataType);
+        }
+        else if (strcmp(dataType, "char") == 0)
+        {
+            printf("Value at index %i: %c (%s)\n", i, *(char *)current->value, dataType);
         }
         else
         {
@@ -255,56 +257,90 @@ void printValues(Node *head)
     }
 }
 
-int main2(void)
+char *createStr(char *src)
+{
+    size_t len = strlen(src) + 1;
+    char *des = malloc(len * sizeof(char));
+    if (des != NULL)
+    {
+        memcpy(des, src, len);
+    }
+
+    return des;
+}
+
+void ShowBasicCreation()
 {
     Node *head = add(NULL, &(int){1}, "int");
 
     char *str = "Cedoispir";
     add(head, &(int){2}, "int");
     add(head, str, "str");
-    add(head, &(int){4}, "lol");
+    add(head, &(int){3}, "int");
+    add(head, &(int){4}, "int");
     add(head, &(int){5}, "int");
 
+    printf("Values added to list:\n");
     printValues(head);
     printf("\n");
-    insert(head, &(int){9}, 0, "int");
-
+    
+    int index = 1;
+    printf("Value inserted at index %i:\n", index);
+    insert(head, &(int){10}, index, "int");
     printValues(head);
     printf("\n");
-    delete (head, 0);
 
+    int rmIndex = 3;
+    printf("Value deleted at index %i:\n", rmIndex);
+    delete (head, rmIndex);
     printValues(head);
 
     freeMemory(head);
+}
 
-    return 0;
+void ShowConvertFromArray(void)
+{
+    // Create integer array
+    int integers[] = {50, 40, 30, 20, 10, 9, 8, 7, 6};
+    size_t integerLen = sizeof(integers) / sizeof(integers[0]);
+
+    // Create string array
+    char **strings;
+    size_t stringLen = 5;
+    strings = (char **)malloc(stringLen * sizeof(char *));
+    // Allocate memory for each string dynamically
+    strings[0] = createStr("Marco");
+    strings[1] = createStr("Bia");
+    strings[2] = createStr("Bruno");
+    strings[3] = createStr("Augie");
+    strings[4] = createStr("Bianca");
+
+    // Create char array
+    char charArray[6] = {'H', 'e', 'l', 'l', 'o', '!'};
+    size_t charLen = sizeof(charArray) / sizeof(charArray[0]);
+
+    Node *integerHead = convertArray(integers, integerLen, "int");
+    Node *stringHead = convertArray(strings, stringLen, "str");
+    Node *charHead = convertArray(charArray, charLen, "char");
+
+    printf("Converting from int array:\n");
+    printValues(integerHead);
+
+    printf("\nConverting from string array:\n");
+    printValues(stringHead);
+
+    printf("\nConverting from char array:\n");
+    printValues(charHead);
+
+    // Free allocated memory
+    freeMemory(integerHead);
+    freeMemory(stringHead);
+    freeMemory(charHead);
 }
 
 int main(void)
 {
-    // int number[] = {50, 40, 30, 20, 10, 9, 8, 7, 6};
-    // size_t len = sizeof(number) / sizeof(number[0]);
-
-    char words[][10] = {"Marco", "Bia", "Bruno", "Augie"};
-    size_t len = sizeof(words) / sizeof(words[0]);
-
-    char **strings;
-    int numStrings = 5;
-
-    strings = (char **)malloc(numStrings * sizeof(char *));
-
-    // Allocate memory for each string dynamically
-    strings[0] = strdup("Marco");
-    strings[1] = strdup("Bia");
-    strings[2] = strdup("Bruno");
-    strings[3] = strdup("Augie");
-    strings[4] = strdup("Bianca");
-
-    Node *head = convertArray(strings, len, "str");
-
-    printValues(head);
-
-    freeMemory(head);
-
+    // ShowBasicCreation();
+    ShowConvertFromArray();
     return 0;
 }
