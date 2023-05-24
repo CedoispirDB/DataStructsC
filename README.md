@@ -8,7 +8,8 @@ The testing files are named as: data_structure_name + Test.c, like linkedListTes
 ```sh
 make test SOURCE=file_name
 ```
-Example:
+**Example:**
+
 This will compile and run the linkedList test file
 ```sh
 make test SOURCE=linkedList
