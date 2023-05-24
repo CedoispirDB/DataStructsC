@@ -1,27 +1,49 @@
-#include <stdio.h>
-#include "linkedList.h  "
+#include "linkedList.h"
+
+#define MAX_SIZE 1024
 
 typedef struct ValueKeyPair
 {
     int key;
-    void *value
+    void *value;
 } ValueKeyPair;
+
+typedef struct Bucket
+{
+    Node *content;
+    ValueKeyPair valueKeyPair; 
+} Bucket;
 
 typedef struct HashTable
 {
-    Node *buckets;
+    Bucket buckets[MAX_SIZE];
+    size_t tableSize;
+    size_t numOfElements;
 } HashTable;
 
-char *createHashCode(char *key)
+unsigned long createHashCode(char *key)
 {
-    return key % 30;
+    unsigned long hash = 5381;
+    int c = (int) key;
+    size_t count = 0;
+
+    while (count < strlen(key))
+    {
+        c =  (int) key[count];
+        printf("Char: %c. ASCII value: %d\n", key[count], c);
+        hash = ((hash << 5) + hash) + c;
+        count++;
+    }
+
+    return hash % ;
 }
 
 int main(void)
 {
-   char *hash = createHashCode("marco");
+    unsigned long hash = createHashCode("bia");
 
-    printf("Hash code: %s\n", hash);
+    printf("Hash code: %lu\n", hash);
+    printf("Index: %lu\n", hash % 4);
 
     return 0;
 }
