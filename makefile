@@ -79,4 +79,8 @@ cleanTest:
 	del .\Tests\bin\*.exe
 	del .\Tests\obj\*.o
 
+
+# Clean all 
+cleanAll: clean cleanTest
+
 .PHONY: all clean
