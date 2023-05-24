@@ -35,10 +35,10 @@ unsigned long createHashCode(char *key)
         count++;
     }
 
-    return hash % ;
+    return hash % MAX_SIZE;
 }
 
-int main3(void)
+int main(void)
 {
     unsigned long hash = createHashCode("bia");
 
