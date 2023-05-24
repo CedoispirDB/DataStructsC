@@ -1,3 +1,4 @@
 .vscode/*
 Executables
-Test
+Tests/bin
+Tests/obj
