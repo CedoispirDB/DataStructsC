@@ -41,8 +41,8 @@ clean:
 # ----------------------------------- #
 
 # Name of test file
-TEST_FILE := linkedListTest
 TEST_SRC := linkedList
+TEST_FILE := $(TEST_SRC)Test
 
 # Object files directory
 OBJ_DIR = Tests/obj

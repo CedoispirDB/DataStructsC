@@ -1,17 +1,16 @@
-#include "linkedList.h"
-
-char *DATA_TYPE;
+#include "customLinkedList.h"
 
 Node *createNode()
 {
     return (Node *)malloc(sizeof(Node));
 }
 
-Node *add(Node *head, void *value)
+Node *add(Node *head, void *value, char *dataType)
 {
     Node *temp = createNode();
     temp->value = value;
     temp->next = NULL;
+    temp->dataType = dataType;
 
     if (head == NULL)
     {
@@ -93,7 +92,7 @@ Node *getNode(Node *head, int index)
     return NULL;
 }
 
-Node *insert(Node *head, void *value, int index)
+Node *insert(Node *head, void *value, int index, char *dataType)
 {
     exitIfOutOfBounds(head, index, "insert");
 
@@ -103,17 +102,19 @@ Node *insert(Node *head, void *value, int index)
     {
         newNode->value = head->value;
         newNode->next = head->next;
+        newNode->dataType = dataType;
         head->value = value;
         head->next = newNode;
         return newNode;
     }
     else if (index == len(head) - 1)
     {
-        add(head, value);
+        add(head, value, dataType);
         return newNode;
     }
 
     newNode->value = value;
+    newNode->dataType = dataType;
 
     Node *prevNode = getNode(head, index - 1);
     Node *nextNode = getNode(head, index);
@@ -153,7 +154,7 @@ void freeMemory(Node *head)
 {
     Node *current = head;
     Node *temp;
-    
+
     while (current != NULL)
     {
         temp = current;
@@ -163,11 +164,11 @@ void freeMemory(Node *head)
     }
 }
 
-Node *convertArray(void *array, size_t len)
+Node *convertArray(void *array, size_t len, char *dataType)
 {
     Node *head;
 
-    if (strcmp(DATA_TYPE, "int") == 0)
+    if (strcmp(dataType, "int") == 0)
     {
         int *intArray = (int *)array;
 
@@ -175,13 +176,13 @@ Node *convertArray(void *array, size_t len)
         {
             if (i == 0)
             {
-                head = add(NULL, (void *)&intArray[i]);
+                head = add(NULL, (void *)&intArray[i], dataType);
                 continue;
             }
-            add(head, (void *)&intArray[i]);
+            add(head, (void *)&intArray[i], dataType);
         }
     }
-    else if (strcmp(DATA_TYPE, "str") == 0)
+    else if (strcmp(dataType, "str") == 0)
     {
         char **strArray = (char **)array;
 
@@ -189,13 +190,13 @@ Node *convertArray(void *array, size_t len)
         {
             if (i == 0)
             {
-                head = add(NULL, (void *)strArray[i]);
+                head = add(NULL, (void *)strArray[i], dataType);
                 continue;
             }
-            add(head, (void *)strArray[i]);
+            add(head, (void *)strArray[i], dataType);
         }
     }
-    else if (strcmp(DATA_TYPE, "char") == 0)
+    else if (strcmp(dataType, "char") == 0)
     {
         char *charArray = (char *)array;
 
@@ -203,15 +204,15 @@ Node *convertArray(void *array, size_t len)
         {
             if (i == 0)
             {
-                head = add(NULL, &charArray[i]);
+                head = add(NULL, &charArray[i], dataType);
                 continue;
             }
-            add(head, &charArray[i]);
+            add(head, &charArray[i], dataType);
         }
     }
     else
     {
-        printf("Data type \"%s\" not implemented\n", DATA_TYPE);
+        printf("Data type \"%s\" not implemented\n", dataType);
     }
 
     return head;
@@ -223,22 +224,23 @@ void printValues(Node *head)
     for (int i = 0; i < len(head); ++i)
     {
         Node *current = getNode(head, i);
+        char *dataType = (char *)current->dataType;
 
-        if (strcmp(DATA_TYPE, "int") == 0)
+        if (strcmp(dataType, "int") == 0)
         {
-            printf("Value at index %i: %i (%s)\n", i, *(int *)current->value, DATA_TYPE);
+            printf("Value at index %i: %i (%s)\n", i, *(int *)current->value, dataType);
         }
-        else if (strcmp(DATA_TYPE, "str") == 0)
+        else if (strcmp(dataType, "str") == 0)
         {
-            printf("Value at index %i: %s (%s)\n", i, (char *)current->value, DATA_TYPE);
+            printf("Value at index %i: %s (%s)\n", i, (char *)current->value, dataType);
         }
-        else if (strcmp(DATA_TYPE, "char") == 0)
+        else if (strcmp(dataType, "char") == 0)
         {
-            printf("Value at index %i: %c (%s)\n", i, *(char *)current->value, DATA_TYPE);
+            printf("Value at index %i: %c (%s)\n", i, *(char *)current->value, dataType);
         }
         else
         {
-            printf("Data type \"%s\" not implemented\n", DATA_TYPE);
+            printf("Data type \"%s\" not implemented\n", dataType);
         }
     }
 }
@@ -257,11 +259,14 @@ char *createStr(char *src)
 
 void ShowBasicCreation()
 {
-    Node *head = add(NULL, &(int){1});
-    add(head, &(int){2});
-    add(head, &(int){3});
-    add(head, &(int){4});
-    add(head, &(int){5});
+    Node *head = add(NULL, &(int){1}, "int");
+
+    char *str = "Cedoispir";
+    add(head, &(int){2}, "int");
+    add(head, str, "str");
+    add(head, &(int){3}, "int");
+    add(head, &(int){4}, "int");
+    add(head, &(int){5}, "int");
 
     printf("Values added to list:\n");
     printValues(head);
@@ -269,7 +274,7 @@ void ShowBasicCreation()
     
     int index = 1;
     printf("Value inserted at index %i:\n", index);
-    insert(head, &(int){10}, index);
+    insert(head, &(int){10}, index, "int");
     printValues(head);
     printf("\n");
 
@@ -302,9 +307,9 @@ void ShowConvertFromArray(void)
     char charArray[6] = {'H', 'e', 'l', 'l', 'o', '!'};
     size_t charLen = sizeof(charArray) / sizeof(charArray[0]);
 
-    Node *integerHead = convertArray(integers, integerLen);
-    Node *stringHead = convertArray(strings, stringLen);
-    Node *charHead = convertArray(charArray, charLen);
+    Node *integerHead = convertArray(integers, integerLen, "int");
+    Node *stringHead = convertArray(strings, stringLen, "str");
+    Node *charHead = convertArray(charArray, charLen, "char");
 
     printf("Converting from int array:\n");
     printValues(integerHead);

@@ -38,7 +38,7 @@ unsigned long createHashCode(char *key)
     return hash % ;
 }
 
-int main(void)
+int main3(void)
 {
     unsigned long hash = createHashCode("bia");
 
