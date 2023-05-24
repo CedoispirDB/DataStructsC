@@ -10,7 +10,9 @@ CFLAGS := -Wall -Wextra -std=c99 -g
 
 # Directories
 SRC_DIR := DataStructs
-OBJ_DIR := Executables
+BUILD_DIR := builds
+OBJ_DIR := $(BUILD_DIR)/obj
+EXE_DIR := $(BUILD_DIR)/bin
 
 # Source files
 SRCS := $(wildcard $(SRC_DIR)/*.c)
@@ -18,7 +20,7 @@ SRCS := $(wildcard $(SRC_DIR)/*.c)
 OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 # OBJS := $(strip $(OBJS))
 # Executable name
-EXEC := $(OBJ_DIR)/main
+EXEC := $(EXE_DIR)/main
 
 # Default target
 all: $(EXEC)
@@ -30,8 +32,8 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	del .\$(OBJ_DIR)\*.o
-	del .\$(OBJ_DIR)\main.exe
+	del .\$(BUILD_DIR)\obj\*.o
+	del .\$(BUILD_DIR)\bin\main.exe
 
 
 # ----------------------------------- #
