@@ -61,7 +61,6 @@ LIST_OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(notdir $(LIST_SRCS)))
 # Executables
 TEST_EXEC = $(BIN_DIR)/$(TEST_FILE)
 
-# Default target
 test: $(TEST_EXEC)
 
 # Compile test file
