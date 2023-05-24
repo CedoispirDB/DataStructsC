@@ -1,4 +1,4 @@
 .vscode/*
 builds
-Tests/bin
-Tests/obj
+Tests/bin/*
+Tests/obj/*
