@@ -31,6 +31,5 @@ void ShowBasicCreation();
 void ShowConvertFromArray();
 char *createStr(char *src);
 int len(Node *head);
-bool checkType();
 
 #endif  // CUSTOM_LIST_H
