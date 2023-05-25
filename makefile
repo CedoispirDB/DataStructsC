@@ -15,7 +15,8 @@ OBJ_DIR := $(BUILD_DIR)/obj
 EXE_DIR := $(BUILD_DIR)/bin
 
 # Source files
-SRCS := $(wildcard $(SRC_DIR)/*.c)
+# SRCS := $(filter-out $(IGNORED_FILES), $(wildcard $(SRC_DIR)/*.c))
+SRCS := $(SRC_DIR)/linkedList.c $(SRC_DIR)/hashTable.c
 # Object files
 OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 # OBJS := $(strip $(OBJS))
@@ -61,7 +62,8 @@ LIST_OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(notdir $(LIST_SRCS)))
 # Executables
 TEST_EXEC = $(BIN_DIR)/$(TEST_FILE)
 
-test: $(TEST_EXEC)
+test: 
+	$(TEST_EXEC)
 
 # Compile test file
 $(OBJ_DIR)/$(TEST_FILE).o: Tests/$(TEST_FILE).c

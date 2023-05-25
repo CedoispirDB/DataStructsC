@@ -17,15 +17,15 @@ Map the hash code to an index within the array by taking the hash code modulo th
 If the bucket at the calculated index is empty, store the key-value pair there.
 If the bucket is not empty (a collision occurs), handle it according to the chosen collision resolution strategy. For example, in chaining, you can add the new key-value pair to the linked list associated with the bucket.
 Update the count of stored elements.
-Retrieval:
 
+Retrieval:
 Calculate the hash code for the key using the same hash function used for insertion.
 Map the hash code to an index within the array.
 If the bucket at the calculated index is empty, the key is not found.
 If the bucket is not empty, search for the key within the bucket. In chaining, you would traverse the linked list until you find the key or reach the end.
 If the key is found, retrieve the associated value.
-Deletion:
 
+Deletion:
 Calculate the hash code for the key.
 Map the hash code to an index within the array.
 If the bucket at the calculated index is empty, the key is not present in the hash table.

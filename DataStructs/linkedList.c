@@ -33,6 +33,12 @@ Node *add(Node *head, void *value)
 
 int len(Node *head)
 {
+
+    if(head == NULL) 
+    {
+        return -1;
+    }
+
     int size = 0;
 
     Node *current = head;

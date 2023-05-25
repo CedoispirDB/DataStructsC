@@ -4,3 +4,4 @@ Tests/bin/*.o
 Tests/bin/*.exe
 Tests/obj/*.o
 Tests/obj/*.exe
+build.ps1
