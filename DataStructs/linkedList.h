@@ -25,7 +25,7 @@ Node *convertArray(void *array, size_t len);
 void *get(Node *head, int index);
 void exitIfOutOfBounds(Node *head, int index, char *loc);
 void delete(Node *head, int index);
-void freeMemory(Node *head);
+void freeList(Node *head);
 void printValues(Node *head);
 void ShowBasicCreation();
 void ShowConvertFromArray();

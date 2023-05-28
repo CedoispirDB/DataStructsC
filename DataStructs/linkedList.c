@@ -155,7 +155,7 @@ void delete(Node *head, int index)
     free(remove);
 }
 
-void freeMemory(Node *head)
+void freeList(Node *head)
 {
     Node *current = head;
     Node *temp;
@@ -284,7 +284,7 @@ void ShowBasicCreation()
     delete (head, rmIndex);
     printValues(head);
 
-    freeMemory(head);
+    freeList(head);
 }
 
 void ShowConvertFromArray(void)
@@ -322,7 +322,7 @@ void ShowConvertFromArray(void)
     printValues(charHead);
 
     // Free allocated memory
-    freeMemory(integerHead);
-    freeMemory(stringHead);
-    freeMemory(charHead);
+    freeList(integerHead);
+    freeList(stringHead);
+    freeList(charHead);
 }

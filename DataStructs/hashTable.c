@@ -1,6 +1,8 @@
+#include <stdint.h>
 #include "linkedList.h"
 
-#define MAX_SIZE 1024
+#define MAX_TABLE_SIZE 500
+#define MEMORY_CAP 6400
 
 typedef unsigned long ulong;
 
@@ -17,7 +19,7 @@ typedef struct Bucket
 
 typedef struct HashTable
 {
-    Bucket buckets[MAX_SIZE];
+    Bucket buckets[MAX_TABLE_SIZE];
     size_t keyCount;
     size_t uniqueKeys;
 } HashTable;
@@ -56,6 +58,49 @@ typedef struct HashTable
 
 //     return hash % table->tableSize;
 // }
+
+ uint32_t murmur_32_scramble(uint32_t k)
+{
+    k *= 0xcc9e2d51;
+    k = (k << 15) | (k >> 17);
+    k *= 0x1b873593;
+    return k;
+}
+uint32_t murmur3_32(const char *key, size_t len, uint32_t seed)
+{
+    uint32_t h = seed;
+    uint32_t k;
+    /* Read in groups of 4. */
+    for (size_t i = len >> 2; i; i--)
+    {
+        // Here is a source of differing results across endiannesses.
+        // A swap here has no effects on hash properties though.
+        memcpy(&k, key, sizeof(uint32_t));
+        key += sizeof(uint32_t);
+        h ^= murmur_32_scramble(k);
+        h = (h << 13) | (h >> 19);
+        h = h * 5 + 0xe6546b64;
+    }
+    /* Read the rest. */
+    k = 0;
+    for (size_t i = len & 3; i; i--)
+    {
+        k <<= 8;
+        k |= key[i - 1];
+    }
+    // A swap is *not* necessary here because the preceding loop already
+    // places the low bytes in the low places according to whatever endianness
+    // we use. Swaps only apply when the memory is copied in a chunk.
+    h ^= murmur_32_scramble(k);
+    /* Finalize. */
+    h ^= len;
+    h ^= h >> 16;
+    h *= 0x85ebca6b;
+    h ^= h >> 13;
+    h *= 0xc2b2ae35;
+    h ^= h >> 16;
+    return h;
+}
 
 size_t hashFunc(char *key)
 {
@@ -177,12 +222,23 @@ void *getByKey(HashTable *table, char *key)
     return NULL;
 }
 
+void freeHashTable(HashTable *table)
+{
+    for (int i = 0; i < MAX_TABLE_SIZE; i++)
+    {
+        LinkedList *bucket = table->buckets[i].content;
+        freeList(bucket);
+    }
+    free(table->buckets);
+    free(table);
+}
+
 int main2(void)
 {
     HashTable *hashTable = malloc(sizeof(HashTable));
     if (hashTable != NULL)
     {
-        for (int i = 0; i < MAX_SIZE; ++i)
+        for (int i = 0; i < MAX_TABLE_SIZE; ++i)
         {
             hashTable->buckets[i].content = NULL;
         }
@@ -274,18 +330,34 @@ int main2(void)
 
 int main()
 {
+    uint32_t seed = 10;
+    char *key = "Marco";
+    printf("%zu\n", strlen(key));
+    uint32_t hash = murmur3_32(key, strlen(key), seed);
+
+    printf("Hash: %i\n", hash);
+    return 1;
+}
+
+int main1()
+{
     HashTable *hashTable = malloc(sizeof(HashTable));
     if (hashTable != NULL)
     {
-        for (int i = 0; i < MAX_SIZE; ++i)
+        for (int i = 0; i < MAX_TABLE_SIZE; ++i)
         {
+
             hashTable->buckets[i].content = NULL;
         }
+    }
+    else
+    {
+        printf("It broke\n");
     }
     hashTable->keyCount = 0;
     hashTable->uniqueKeys = 0;
 
-    int N = 100;
+    int N = 10;
 
     int *numbers = (int *)malloc(N * sizeof(int));
 
@@ -356,7 +428,7 @@ int main()
 
     free(strings);
     free(numbers);
-    free(hashTable);
+    freeHashTable(hashTable);
 
     return 0;
 }

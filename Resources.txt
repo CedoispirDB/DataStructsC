@@ -1,5 +1,8 @@
 Hash Table
--http://www.cse.yorku.ca/~oz/hash.html
+ - http://www.cse.yorku.ca/~oz/hash.html
+ - https://www.hackerearth.com/practice/data-structures/hash-tables/basics-of-hash-tables/tutorial/
+ - https://www.interviewcake.com/concept/java/hash-map
+
 A hash table is a data structure that allows efficient storage and retrieval of key-value pairs. It uses a hash function to compute a hash code for each key, which determines the index where the corresponding value will be stored.
 
 Here's how to create and use a hash table:
@@ -11,7 +14,6 @@ Choose a hash function: Select or design a hash function that takes a key as inp
 Initialize the hash table: Create an instance of the hash table structure and initialize its properties. Allocate memory for the array of buckets and set the initial values for the size and count of stored elements.
 
 Insertion:
-
 Calculate the hash code for the key using the chosen hash function.
 Map the hash code to an index within the array by taking the hash code modulo the size of the array.
 If the bucket at the calculated index is empty, store the key-value pair there.
@@ -36,6 +38,7 @@ Resize the hash table (optional): As the number of stored elements increases, yo
 It's important to consider factors such as the load factor (ratio of stored elements to the size of the hash table) and the chosen collision resolution strategy (e.g., chaining or open addressing) when implementing a hash table.
 
 I hope this overview helps you understand the process of creating and using a hash table. Remember that there are various implementation details and optimizations that can be applied based on your specific requirements and programming language.
+
 hash function example:
 def hash_function(key, table_size):
     hash_value = 5381
