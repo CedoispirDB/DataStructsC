@@ -2,6 +2,7 @@ Hash Table
  - http://www.cse.yorku.ca/~oz/hash.html
  - https://www.hackerearth.com/practice/data-structures/hash-tables/basics-of-hash-tables/tutorial/
  - https://www.interviewcake.com/concept/java/hash-map
+ - https://asecuritysite.com/hash/mur?message=The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog
 
 A hash table is a data structure that allows efficient storage and retrieval of key-value pairs. It uses a hash function to compute a hash code for each key, which determines the index where the corresponding value will be stored.
 
