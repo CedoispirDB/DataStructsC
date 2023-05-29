@@ -1,7 +1,11 @@
 # Makefile for DataStructC project
 
 # Set shell to cmd.exe
-SHELL := cmd.exe
+ifeq ($(OS),Windows_NT)
+    SHELL := cmd.exe
+else
+    SHELL := /bin/sh
+endif
 
 # Compiler
 CC := gcc
@@ -33,8 +37,13 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	del .\$(BUILD_DIR)\obj\*.o
-	del .\$(BUILD_DIR)\bin\main.exe
+ifeq ($(SHELL), cmd.exe)
+	del /Q $(BUILD_DIR)\obj\*.o
+	del /Q $(BUILD_DIR)\bin\main.exe
+else
+	rm -f $(BUILD_DIR)/obj/*
+	rm -f $(BUILD_DIR)/bin/*
+endif
 
 
 # ----------------------------------- #
@@ -77,9 +86,14 @@ $(OBJ_DIR)/$(TEST_SRC).o: DataStructs/$(TEST_SRC).c
 $(TEST_EXEC): $(TEST_OBJS) $(LIST_OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
-cleanTest:
-	del .\Tests\bin\*.exe
-	del .\Tests\obj\*.o
+cleanTest: 
+ifeq ($(SHELL), cmd.exe)
+	del /Q .\Tests\bin\*.exe
+	del /Q .\Tests\obj\*.o
+else
+	rm -f .\Tests\bin\*
+	rm -f .\Tests\obj\*
+endif
 
 
 # Clean all 

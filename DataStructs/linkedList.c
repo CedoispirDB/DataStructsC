@@ -171,7 +171,7 @@ void freeList(Node *head)
 
 Node *convertArray(void *array, size_t len)
 {
-    Node *head;
+    Node *head = NULL;
 
     if (strcmp(DATA_TYPE, "int") == 0)
     {

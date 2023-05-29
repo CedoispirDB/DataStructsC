@@ -332,7 +332,9 @@ int main()
 {
     uint32_t seed = 10;
     char *key = "Marco";
-    printf("%zu\n", strlen(key));
+    // printf("%zu\n", strlen(key));
+    printf("%zu\n", sizeof(key));
+
     uint32_t hash = murmur3_32(key, strlen(key), seed);
 
     printf("Hash: %i\n", hash);

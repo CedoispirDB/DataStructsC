@@ -1,0 +1,1 @@
+make && ./builds/bin/main
