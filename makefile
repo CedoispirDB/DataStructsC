@@ -20,7 +20,8 @@ EXE_DIR := $(BUILD_DIR)/bin
 
 # Source files
 # SRCS := $(filter-out $(IGNORED_FILES), $(wildcard $(SRC_DIR)/*.c))
-SRCS := $(SRC_DIR)/linkedList.c $(SRC_DIR)/hashTable.c
+# SRCS := $(SRC_DIR)/linkedList.c $(SRC_DIR)/hashTable.c
+SRCS := $(SRC_DIR)/xList.c
 # Object files
 OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 # OBJS := $(strip $(OBJS))

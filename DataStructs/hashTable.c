@@ -4,6 +4,7 @@
 
 #define MAX_TABLE_SIZE 500
 #define MEMORY_CAP 6400
+#define TABLE_SEED 9973
 
 typedef unsigned long ulong;
 
@@ -60,7 +61,7 @@ typedef struct HashTable
 //     return hash % table->tableSize;
 // }
 
- uint32_t murmur_32_scramble(uint32_t k)
+uint32_t murmur_32_scramble(uint32_t k)
 {
     k *= 0xcc9e2d51;
     k = (k << 15) | (k >> 17);
@@ -104,6 +105,54 @@ uint32_t murmur3_32(const char *key, size_t len, uint32_t seed)
     return h;
 }
 
+uint64_t murmurhash64A(const void *key, int len, uint64_t seed)
+{
+    const uint64_t m = 0xc6a4a7935bd1e995ULL;
+    const int r = 47;
+
+    uint64_t h = seed ^ (len * m);
+
+    const uint64_t *data = (const uint64_t *)key;
+    const uint64_t *end = data + (len / 8);
+
+    while (data != end)
+    {
+        uint64_t k = *data++;
+        k *= m;
+        k ^= k >> r;
+        k *= m;
+        h ^= k;
+        h *= m;
+    }
+
+    const uint8_t *data2 = (const uint8_t *)data;
+
+    switch (len & 7)
+    {
+    case 7:
+        h ^= ((uint64_t)data2[6]) << 48;
+    case 6:
+        h ^= ((uint64_t)data2[5]) << 40;
+    case 5:
+        h ^= ((uint64_t)data2[4]) << 32;
+    case 4:
+        h ^= ((uint64_t)data2[3]) << 24;
+    case 3:
+        h ^= ((uint64_t)data2[2]) << 16;
+    case 2:
+        h ^= ((uint64_t)data2[1]) << 8;
+    case 1:
+        h ^= ((uint64_t)data2[0]);
+        h *= m;
+    };
+
+    h ^= h >> r;
+    h *= m;
+    h ^= h >> r;
+
+    return h;
+}
+
 size_t hashFunc(char *key)
 {
     size_t keyCount = 0;
@@ -123,13 +172,13 @@ void set(HashTable *table, char *key, void *value)
 
     table->keyCount++;
     table->uniqueKeys++;
-    size_t index = hashFunc(key);
+    size_t index = murmurhash64A(key, strlen(key), TABLE_SEED) % MAX_TABLE_SIZE;
 
     // printf("Key: %s\n", key);
     // printf("%zu %% %zu =  %zu - ", createHashCode(key), table->tableSize, index);
     // printf("index: %i\n", index);
     // printf("keys: %zu, unique keys: %zu\n", table->keyCount, table->uniqueKeys);
-
+    // printf("content ptr: %p\n", table->buckets[index].content);
     // keyCount -> how many in the array index >  0; index < keyCount
     if (table->keyCount != 0 && table->buckets[index].content != NULL)
     {
@@ -146,7 +195,7 @@ void set(HashTable *table, char *key, void *value)
 
         // Link values with the same hash code
         add(tempBucket.content, tempPair);
-        printf("REPEATED: For key: %s, value: %i added at index: %zu\n", key, *(int *)value, index);
+        printf("REPEATED: For key: %s, value: %s added at index: %zu\n", key, (char *)value, index);
 
         return;
     }
@@ -161,12 +210,12 @@ void set(HashTable *table, char *key, void *value)
     bucket.content = list;
 
     table->buckets[index] = bucket;
-    printf("UNIQUE: For key: %s, value: %i added at index: %zu\n", key, *(int *)value, index);
+    printf("UNIQUE: For key: %s, value: %s added at index: %zu\n", key, (char *)value, index);
 }
 
 void *getByKey(HashTable *table, char *key)
 {
-    size_t index = hashFunc(key);
+    size_t index = murmurhash64A(key, strlen(key), TABLE_SEED) % MAX_TABLE_SIZE;
 
     if (table->buckets[index].content == NULL)
     {
@@ -232,12 +281,12 @@ void freeHashTable(HashTable *table)
         freeList(bucket);
     }
     free(table->buckets);
-    free(table);
 }
 
 int main2(void)
 {
     HashTable *hashTable = malloc(sizeof(HashTable));
+
     if (hashTable != NULL)
     {
         for (int i = 0; i < MAX_TABLE_SIZE; ++i)
@@ -330,45 +379,6 @@ int main2(void)
     return 0;
 }
 
-uint64_t murmurhash64A(const void *key, int len, uint64_t seed) {
-    const uint64_t m = 0xc6a4a7935bd1e995ULL;
-    const int r = 47;
-
-    uint64_t h = seed ^ (len * m);
-
-    const uint64_t *data = (const uint64_t *)key;
-    const uint64_t *end = data + (len / 8);
-
-    while (data != end) {
-        uint64_t k = *data++;
-        k *= m;
-        k ^= k >> r;
-        k *= m;
-        h ^= k;
-        h *= m;
-    }
-
-    const uint8_t *data2 = (const uint8_t *)data;
-
-    switch (len & 7) {
-        case 7: h ^= ((uint64_t)data2[6]) << 48;
-        case 6: h ^= ((uint64_t)data2[5]) << 40;
-        case 5: h ^= ((uint64_t)data2[4]) << 32;
-        case 4: h ^= ((uint64_t)data2[3]) << 24;
-        case 3: h ^= ((uint64_t)data2[2]) << 16;
-        case 2: h ^= ((uint64_t)data2[1]) << 8;
-        case 1: h ^= ((uint64_t)data2[0]);
-                h *= m;
-    };
-
-    h ^= h >> r;
-    h *= m;
-    h ^= h >> r;
-
-    return h;
-}
-
-
 int main()
 {
     // uint32_t seed = 10;
@@ -379,19 +389,40 @@ int main()
     // uint32_t hash = murmur3_32(key, strlen(key), seed);
 
     // printf("Hash: %i\n", hash);
-    char *key = "marco";
-    int len = strlen(key);
-    uint64_t seed = 10;
+    // char *key = "marco";
+    // int len = strlen(key);
+    // uint64_t seed = 10;
 
-    uint64_t hash = murmurhash64A(key, len, seed);
-    printf("Hash: %" PRIu64 "\n", hash);
+    // uint64_t hash = murmurhash64A("name", len, seed);
+    // printf("Hash: %" PRIu64 "\n", hash);
+    // printf("index: %llu\n", hash % 10);
+
+    HashTable *hashTable = malloc(sizeof(HashTable));
+    char * key = "a";
+    set(hashTable, key, "Marco");
+    char *name = getByKey(hashTable, key);
+    printf("Name: %s\n", name);
+    key = "b";
+    set(hashTable, key, "Marco2");
+    char *name2 = getByKey(hashTable, key);
+    printf("Name2: %s\n", name2);
+    key = "c";
+    set(hashTable, key, "Marco3");
+    char *name3 = getByKey(hashTable, key);
+    printf("Name3: %s\n", name3);
+    
+    key = "d";
+    set(hashTable, key, "Marco4");
+    char *name4 = getByKey(hashTable, key);
+    printf("Name4: %s\n", name4);
 
     return 1;
 }
 
-int main1()
+int main23()
 {
     HashTable *hashTable = malloc(sizeof(HashTable));
+
     if (hashTable != NULL)
     {
         for (int i = 0; i < MAX_TABLE_SIZE; ++i)
@@ -407,7 +438,7 @@ int main1()
     hashTable->keyCount = 0;
     hashTable->uniqueKeys = 0;
 
-    int N = 10;
+    int N = 200;
 
     int *numbers = (int *)malloc(N * sizeof(int));
 
@@ -479,6 +510,7 @@ int main1()
     free(strings);
     free(numbers);
     freeHashTable(hashTable);
+    // free(hashTable);
 
     return 0;
 }
