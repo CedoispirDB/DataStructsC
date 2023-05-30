@@ -192,7 +192,7 @@ int main(void)
 
     printf("\n");
 
-    for (int i = (int) head->length * -1; i < 0; ++ei)
+    for (int i = (int) head->length * -1; i < 0; ++i)
     {
         char *value = get(head, i);
 
