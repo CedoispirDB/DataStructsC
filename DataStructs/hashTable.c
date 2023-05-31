@@ -1,10 +1,9 @@
 #include <stdint.h>
-#include <inttypes.h>
 #include "linkedList.h"
 
 #define MAX_TABLE_SIZE 500
 #define MEMORY_CAP 6400
-#define TABLE_SEED 9973
+#define HASH_SEED 9973
 
 typedef unsigned long ulong;
 
@@ -26,145 +25,52 @@ typedef struct HashTable
     size_t uniqueKeys;
 } HashTable;
 
-// ulong createHashCode(char *key)
-// {
-//     unsigned long hash = 5381;
-//     size_t keyCount = 0;
-
-//     while (keyCount < strlen(key))
-//     {
-//         int c = (int)key[keyCount];
-//         hash = ((hash << 5) + hash) + c;
-//         keyCount++;
-//     }
-
-//     return hash;
-// }
-
-// size_t getIndexFromKey(HashTable *table, char *key)
-// {
-//     ulong hash = createHashCode(key);
-
-//     // int index;
-
-//     // if (table->uniqueKeys == 0)
-//     // {
-
-//     //     index = hash % 1;
-//     // }
-//     // else
-//     // {
-//     //     index = hash % table->uniqueKeys;
-//     // }
-//     printf("%zu %% %zu =  %i \n", createHashCode(key), table->tableSize, hash % table->tableSize);
-
-//     return hash % table->tableSize;
-// }
-
-uint32_t murmur_32_scramble(uint32_t k)
+uint32_t rotl32(uint32_t x, int r)
 {
-    k *= 0xcc9e2d51;
-    k = (k << 15) | (k >> 17);
-    k *= 0x1b873593;
-    return k;
-}
-uint32_t murmur3_32(const char *key, size_t len, uint32_t seed)
-{
-    printf("Key: %s, len: %zu, seed: %u\n", key, len, seed);
-    uint32_t h = seed;
-    uint32_t k;
-    /* Read in groups of 4. */
-    for (size_t i = len >> 2; i; i--)
-    {
-        // Here is a source of differing results across endiannesses.
-        // A swap here has no effects on hash properties though.
-        memcpy(&k, key, sizeof(uint32_t));
-        key += sizeof(uint32_t);
-        h ^= murmur_32_scramble(k);
-        h = (h << 13) | (h >> 19);
-        h = h * 5 + 0xe6546b64;
-    }
-    /* Read the rest. */
-    k = 0;
-    for (size_t i = len & 3; i; i--)
-    {
-        k <<= 8;
-        k |= key[i - 1];
-    }
-    // A swap is *not* necessary here because the preceding loop already
-    // places the low bytes in the low places according to whatever endianness
-    // we use. Swaps only apply when the memory is copied in a chunk.
-    h ^= murmur_32_scramble(k);
-    /* Finalize. */
-    h ^= len;
-    h ^= h >> 16;
-    h *= 0x85ebca6b;
-    h ^= h >> 13;
-    h *= 0xc2b2ae35;
-    h ^= h >> 16;
-    return h;
+    return (x << r) | (x >> (32 - r));
 }
 
-uint64_t murmurhash64A(const void *key, int len, uint64_t seed)
+uint32_t MurmurHashAligned2(const void *key, int32_t len, uint32_t seed)
 {
-    const uint64_t m = 0xc6a4a7935bd1e995ULL;
-    const int r = 47;
+    const uint32_t m = 0x5BD1E995;
+    const int32_t r = 24;
+    const uint8_t *data = (const uint8_t *)key;
+    uint32_t h = seed ^ len;
 
-    uint64_t h = seed ^ (len * m);
-
-    const uint64_t *data = (const uint64_t *)key;
-    const uint64_t *end = data + (len / 8);
-
-    while (data != end)
+    // Mix 4 bytes at a time in 32-bit blocks
+    while (len >= 4)
     {
-        uint64_t k = *data++;
+        uint32_t k;
+        memcpy(&k, data, sizeof(uint32_t));
         k *= m;
-        k ^= k >> r;
+        k ^= rotl32(k, r);
         k *= m;
-        h ^= k;
+
         h *= m;
+        h ^= k;
+
+        data += 4;
+        len -= 4;
     }
 
-    const uint8_t *data2 = (const uint8_t *)data;
-
-    switch (len & 7)
+    // Handle the last few bytes
+    switch (len)
     {
-    case 7:
-        h ^= ((uint64_t)data2[6]) << 48;
-    case 6:
-        h ^= ((uint64_t)data2[5]) << 40;
-    case 5:
-        h ^= ((uint64_t)data2[4]) << 32;
-    case 4:
-        h ^= ((uint64_t)data2[3]) << 24;
     case 3:
-        h ^= ((uint64_t)data2[2]) << 16;
+        h ^= data[2] << 16;
     case 2:
-        h ^= ((uint64_t)data2[1]) << 8;
+        h ^= data[1] << 8;
     case 1:
-        h ^= ((uint64_t)data2[0]);
+        h ^= data[0];
         h *= m;
     };
 
-    h ^= h >> r;
+    // Finalize the hash
+    h ^= h >> 13;
     h *= m;
-    h ^= h >> r;
+    h ^= h >> 15;
 
     return h;
-}
-
-size_t hashFunc(char *key)
-{
-    size_t keyCount = 0;
-    int sum = 0;
-    while (keyCount < strlen(key))
-    {
-        int c = (int)key[keyCount];
-        keyCount++;
-        sum += c * keyCount;
-    }
-
-    return sum % 2069;
 }
 
 void set(HashTable *table, char *key, void *value)
@@ -172,16 +78,18 @@ void set(HashTable *table, char *key, void *value)
 
     table->keyCount++;
     table->uniqueKeys++;
-    size_t index = murmurhash64A(key, strlen(key), TABLE_SEED) % MAX_TABLE_SIZE;
+    // size_t index = murmurhash64A(key, strlen(key), TABLE_SEED) % MAX_TABLE_SIZE;
+    size_t index = MurmurHashAligned2(key, strlen(key), HASH_SEED) % MAX_TABLE_SIZE;
 
     // printf("Key: %s\n", key);
-    // printf("%zu %% %zu =  %zu - ", createHashCode(key), table->tableSize, index);
+    // printf("%u %% %d =  %zu\n", MurmurHashAligned2(key, strlen(key), HASH_SEED), MAX_TABLE_SIZE, index);
     // printf("index: %i\n", index);
     // printf("keys: %zu, unique keys: %zu\n", table->keyCount, table->uniqueKeys);
-    // printf("content ptr: %p\n", table->buckets[index].content);
+    // printf("is null %d\n", table->buckets[index].content != NULL);
     // keyCount -> how many in the array index >  0; index < keyCount
     if (table->keyCount != 0 && table->buckets[index].content != NULL)
     {
+
         // Index already taken
         if (table->uniqueKeys > 0)
         {
@@ -195,14 +103,14 @@ void set(HashTable *table, char *key, void *value)
 
         // Link values with the same hash code
         add(tempBucket.content, tempPair);
-        printf("REPEATED: For key: %s, value: %s added at index: %zu\n", key, (char *)value, index);
+        printf("REPEATED: For key: %s, value: %i added at index: %zu\n", key, (char *)value, index);
 
         return;
     }
-
     KeyValuePair *kvp = malloc(sizeof(KeyValuePair));
     kvp->value = value;
     kvp->key = key;
+
 
     LinkedList *list = add(NULL, kvp);
 
@@ -210,12 +118,12 @@ void set(HashTable *table, char *key, void *value)
     bucket.content = list;
 
     table->buckets[index] = bucket;
-    printf("UNIQUE: For key: %s, value: %s added at index: %zu\n", key, (char *)value, index);
+    printf("UNIQUE: For key: %s, value: %i added at index: %zu\n", key, (char *)value, index);
 }
 
 void *getByKey(HashTable *table, char *key)
 {
-    size_t index = murmurhash64A(key, strlen(key), TABLE_SEED) % MAX_TABLE_SIZE;
+    size_t index = MurmurHashAligned2(key, strlen(key), HASH_SEED) % MAX_TABLE_SIZE;
 
     if (table->buckets[index].content == NULL)
     {
@@ -379,7 +287,7 @@ int main2(void)
     return 0;
 }
 
-int main()
+int main22()
 {
     // uint32_t seed = 10;
     // char *key = "Marco";
@@ -398,7 +306,21 @@ int main()
     // printf("index: %llu\n", hash % 10);
 
     HashTable *hashTable = malloc(sizeof(HashTable));
-    char * key = "a";
+    if (hashTable != NULL)
+    {
+        for (int i = 0; i < MAX_TABLE_SIZE; ++i)
+        {
+
+            hashTable->buckets[i].content = NULL;
+        }
+    }
+    else
+    {
+        printf("It broke\n");
+    }
+    hashTable->keyCount = 0;
+    hashTable->uniqueKeys = 0;
+    char *key = "a";
     set(hashTable, key, "Marco");
     char *name = getByKey(hashTable, key);
     printf("Name: %s\n", name);
@@ -410,16 +332,16 @@ int main()
     set(hashTable, key, "Marco3");
     char *name3 = getByKey(hashTable, key);
     printf("Name3: %s\n", name3);
-    
+
     key = "d";
     set(hashTable, key, "Marco4");
     char *name4 = getByKey(hashTable, key);
     printf("Name4: %s\n", name4);
 
-    return 1;
+    return 0;
 }
 
-int main23()
+int main()
 {
     HashTable *hashTable = malloc(sizeof(HashTable));
 
@@ -438,7 +360,7 @@ int main23()
     hashTable->keyCount = 0;
     hashTable->uniqueKeys = 0;
 
-    int N = 200;
+    int N = 400;
 
     int *numbers = (int *)malloc(N * sizeof(int));
 

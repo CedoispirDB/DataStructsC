@@ -26,6 +26,6 @@ int main(void)
     delete (head, rmIndex);
     printValues(head);
 
-    freeMemory(head);
+    freeList(head);
     return 0;
 }
