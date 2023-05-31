@@ -20,5 +20,6 @@ The exe will be created at ./Tests/bin/linkedListTest.exe
 
 - [LinkedList](https://github.com/CedoispirDB/DataStructsC/blob/main/DataStructs/linkedList.c)
 - [Custom LinkedList](https://github.com/CedoispirDB/DataStructsC/blob/main/DataStructs/customLinkedList.c)
+- [HashTable](https://github.com/CedoispirDB/DataStructsC/blob/main/DataStructs/hashTable.c)
 - [xList](https://github.com/CedoispirDB/DataStructsC/blob/main/DataStructs/xList.c)
 
