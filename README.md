@@ -10,12 +10,15 @@ make test SOURCE=file_name
 ```
 **Example:**
 
-This will compile and run the linkedList test file
+This will compile the linkedList test file
 ```sh
 make test SOURCE=linkedList
 ```
+The exe will be created at ./Tests/bin/linkedListTest.exe
+
 <h3>Links</h3>
 
 - [LinkedList](https://github.com/CedoispirDB/DataStructsC/blob/main/DataStructs/linkedList.c)
 - [Custom LinkedList](https://github.com/CedoispirDB/DataStructsC/blob/main/DataStructs/customLinkedList.c)
+- [xList](https://github.com/CedoispirDB/DataStructsC/blob/main/DataStructs/xList.c)
 
