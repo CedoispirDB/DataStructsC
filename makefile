@@ -24,6 +24,7 @@ SRCS := $(SRC_DIR)/linkedList.c $(SRC_DIR)/hashTable.c
 # SRCS := $(SRC_DIR)/xList.c
 # Object files
 OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
+
 # OBJS := $(strip $(OBJS))
 # Executable name
 EXEC := $(EXE_DIR)/main
@@ -52,23 +53,36 @@ endif
 # ----------------------------------- #
 
 # Name of test file
+ifeq ($(filter test,$(MAKECMDGOALS)),test)
+    # Check if SOURCE parameter was passed
+    ifndef SOURCE
+        $(error SOURCE parameter is required. Please provide a valid value.)
+    endif
+endif
 TEST_SRC := $(SOURCE)
 TEST_FILE := $(TEST_SRC)Test
 
 # Object files directory
-OBJ_DIR = Tests/obj
+OBJ_DIR := Tests/obj
 
 # Executables directory
-BIN_DIR = Tests/bin
+BIN_DIR := Tests/bin
 
 # Source files
-TEST_SRCS = Tests/$(TEST_FILE).c
-LIST_SRCS = DataStructs/$(TEST_SRC).c
+TEST_SRCS := Tests/$(TEST_FILE).c
+LIST_SRCS := DataStructs/$(TEST_SRC).c DataStructs/linkedList.c
+
+# Additional dependencies based on SOURCE value
+# ifeq ($(SOURCE),hashTable)
+#     LIST_SRCS += DataStructs/linkedList.c
+# 	$(info Adding DataStructs/linkedList.c as a dependency)
+# endif
 
 # Object files
-TEST_OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(notdir $(TEST_SRCS)))
-LIST_OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(notdir $(LIST_SRCS)))
-
+TEST_OBJS = $(patsubst %.c, $(OBJ_DIR)/%.o, $(notdir $(TEST_SRCS)))
+# OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
+LIST_OBJS = $(patsubst DataStructs/%.c, $(OBJ_DIR)/%.o, $(LIST_SRCS))
+$(info $(LIST_OBJS))
 # Executables
 TEST_EXEC = $(BIN_DIR)/$(TEST_FILE)
 
@@ -79,7 +93,7 @@ $(OBJ_DIR)/$(TEST_FILE).o: Tests/$(TEST_FILE).c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile src file
-$(OBJ_DIR)/$(TEST_SRC).o: DataStructs/$(TEST_SRC).c
+$(OBJ_DIR)/%.o: DataStructs/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Link object files and generate the executable
