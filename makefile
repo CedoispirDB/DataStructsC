@@ -70,19 +70,17 @@ BIN_DIR := Tests/bin
 
 # Source files
 TEST_SRCS := Tests/$(TEST_FILE).c
-LIST_SRCS := DataStructs/$(TEST_SRC).c DataStructs/linkedList.c
+LIST_SRCS := DataStructs/$(TEST_SRC).c
 
 # Additional dependencies based on SOURCE value
-# ifeq ($(SOURCE),hashTable)
-#     LIST_SRCS += DataStructs/linkedList.c
-# 	$(info Adding DataStructs/linkedList.c as a dependency)
-# endif
+ifeq ($(SOURCE),hashTable)
+    LIST_SRCS += DataStructs/linkedList.c
+endif
 
 # Object files
 TEST_OBJS = $(patsubst %.c, $(OBJ_DIR)/%.o, $(notdir $(TEST_SRCS)))
 # OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 LIST_OBJS = $(patsubst DataStructs/%.c, $(OBJ_DIR)/%.o, $(LIST_SRCS))
-$(info $(LIST_OBJS))
 # Executables
 TEST_EXEC = $(BIN_DIR)/$(TEST_FILE)
 
