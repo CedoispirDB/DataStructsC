@@ -24,7 +24,7 @@ Node *insert(Node *head, void *value, int index);
 Node *convertArray(void *array, size_t len);
 void *get(Node *head, int index);
 void exitIfOutOfBounds(Node *head, int index, char *loc);
-void delete(Node *head, int index);
+void delete(Node **head, int index);
 void freeList(Node *head);
 void printValues(Node *head);
 void ShowBasicCreation();
